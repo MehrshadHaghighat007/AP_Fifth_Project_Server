@@ -33,9 +33,9 @@ public class TCPHandler implements Runnable {
     private void usernameHandler(String action) throws IOException {
         String username = reader.readLine();
         if (action.equals("1")) {
-            if (SignInAndSignUpManager.signInCheckUsername(inetAddress, username)) {
+            if (SignInAndSignUpManager.signInCheckUsername(username)) {
                 writer.println(0);
-                passwordSignInHandler(username);
+                passwordSignInHandler();
             } else {
                 writer.println(1);
                 usernameHandler(action);
@@ -51,13 +51,13 @@ public class TCPHandler implements Runnable {
         }
     }
 
-    private void passwordSignInHandler(String username) throws IOException {
+    private void passwordSignInHandler() throws IOException {
         String password = reader.readLine();
-        if (SignInAndSignUpManager.signInCheckPassword(username, password)) {
+        if (SignInAndSignUpManager.signInCheckPassword(inetAddress, password)) {
             writer.println(0);
         } else {
             writer.println(1);
-            passwordSignInHandler(username);
+            passwordSignInHandler();
         }
     }
 
