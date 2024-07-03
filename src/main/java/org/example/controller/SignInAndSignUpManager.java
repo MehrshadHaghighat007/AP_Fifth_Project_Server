@@ -4,9 +4,11 @@ import org.example.model.Storage;
 import org.example.model.User;
 import org.mindrot.jbcrypt.BCrypt;
 
+import java.net.InetAddress;
+
 public class SignInAndSignUpManager {
-    public static boolean signInCheckUsername(String username) {
-        return Storage.getUsers().containsKey(username);
+    public static boolean signInCheckUsername(InetAddress inetAddress, String username) {
+        return Storage.getUsers().get(inetAddress).getUsername();
     }
 
     public static boolean signUpCheck(String username) {
@@ -17,7 +19,7 @@ public class SignInAndSignUpManager {
         return BCrypt.checkpw(password, Storage.getUsers().get(username).getHashedPassword());
     }
 
-    public static void signUp(String username, String password) {
-        Storage.getUsers().put(username, new User(username, BCrypt.hashpw(password, BCrypt.gensalt())));
+    public static void signUp(InetAddress inetAddress, String username, String password) {
+        Storage.getUsers().put(inetAddress, new User(username, BCrypt.hashpw(password, BCrypt.gensalt())));
     }
 }

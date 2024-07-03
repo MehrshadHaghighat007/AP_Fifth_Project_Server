@@ -29,10 +29,10 @@ public class Server {
                 }
             }).start();
 
-            new MainThread(() -> {
+//            new MainThread(() -> {
                 while (true) {
                     try {
-                        byte[] receiveData = new byte[1024];
+                        byte[] receiveData = new byte[Storage.getPacketSize()];
                         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                         udpServerSocket.receive(receivePacket);
                         new MainThread(new UDPHandler(udpServerSocket, receivePacket)).start();
@@ -40,7 +40,7 @@ public class Server {
                         e.printStackTrace();
                     }
                 }
-            }).start();
+//            }).start();
 
         } catch (IOException e) {
             throw new RuntimeException(e);
