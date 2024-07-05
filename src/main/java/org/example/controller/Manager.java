@@ -6,7 +6,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.net.InetAddress;
 
-public class SignInAndSignUpManager {
+public class Manager {
     public static boolean signInCheckUsername(String username) {
         for (User user : Storage.getUsers().values()) {
             if (user.getUsername().equals(username)) {
@@ -18,11 +18,11 @@ public class SignInAndSignUpManager {
 
     public static boolean signUpCheck(String username) {
         for (User user : Storage.getUsers().values()) {
-            if (!user.getUsername().equals(username)) {
-                return true;
+            if (user.getUsername().equals(username)) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     public static boolean signInCheckPassword(InetAddress inetAddress, String password) {

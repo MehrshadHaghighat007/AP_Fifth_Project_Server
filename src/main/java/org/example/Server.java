@@ -2,7 +2,8 @@ package org.example;
 
 import org.example.controller.MainThread;
 import org.example.controller.TCPHandler;
-import org.example.controller.UDPHandler;
+import org.example.controller.ListHandler;
+import org.example.controller.UploadHandler;
 import org.example.model.Storage;
 import org.example.view.CLI;
 
@@ -29,18 +30,31 @@ public class Server {
                 }
             }).start();
 
-//            new MainThread(() -> {
+            new MainThread(() -> {
                 while (true) {
                     try {
                         byte[] receiveData = new byte[Storage.getPacketSize()];
                         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
                         udpServerSocket.receive(receivePacket);
-                        new MainThread(new UDPHandler(udpServerSocket, receivePacket)).start();
+                        new MainThread(new ListHandler(udpServerSocket, receivePacket)).start();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
-//            }).start();
+            }).start();
+
+            new MainThread(() -> {
+                while (true) {
+                    try {
+                        byte[] situation = new byte[Storage.getPacketSize()];
+                        DatagramPacket receivePacket = new DatagramPacket(situation, situation.length);
+                        udpServerSocket.receive(receivePacket);
+                        new MainThread(new UploadHandler(udpServerSocket, receivePacket)).start();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }).start();
 
         } catch (IOException e) {
             throw new RuntimeException(e);

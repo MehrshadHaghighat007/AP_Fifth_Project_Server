@@ -33,7 +33,7 @@ public class TCPHandler implements Runnable {
     private void usernameHandler(String action) throws IOException {
         String username = reader.readLine();
         if (action.equals("1")) {
-            if (SignInAndSignUpManager.signInCheckUsername(username)) {
+            if (Manager.signInCheckUsername(username)) {
                 writer.println(0);
                 passwordSignInHandler();
             } else {
@@ -41,7 +41,7 @@ public class TCPHandler implements Runnable {
                 usernameHandler(action);
             }
         } else {
-            if (SignInAndSignUpManager.signUpCheck(username)) {
+            if (Manager.signUpCheck(username)) {
                 writer.println(2);
                 passwordSignUpHandler(username);
             } else {
@@ -53,7 +53,7 @@ public class TCPHandler implements Runnable {
 
     private void passwordSignInHandler() throws IOException {
         String password = reader.readLine();
-        if (SignInAndSignUpManager.signInCheckPassword(inetAddress, password)) {
+        if (Manager.signInCheckPassword(inetAddress, password)) {
             writer.println(0);
         } else {
             writer.println(1);
@@ -63,7 +63,8 @@ public class TCPHandler implements Runnable {
 
     private void passwordSignUpHandler(String username) throws IOException {
         String password = reader.readLine();
-        SignInAndSignUpManager.signUp(inetAddress, username, password);
+        Manager.signUp(inetAddress, username, password);
         writer.println(2);
+        clientSocket.close();
     }
 }
