@@ -9,12 +9,10 @@ import java.net.DatagramSocket;
 public class UploadHandler implements Runnable {
     private DatagramSocket udpServerSocketII;
     private final DatagramPacket receivePacketII;
-    private boolean check;
 
-    public UploadHandler(DatagramSocket udpServerSocketII, DatagramPacket receivePacketII, boolean check) {
+    public UploadHandler(DatagramSocket udpServerSocketII, DatagramPacket receivePacketII) {
         this.udpServerSocketII = udpServerSocketII;
         this.receivePacketII = receivePacketII;
-        this.check = check;
     }
 
     @Override
@@ -31,15 +29,11 @@ public class UploadHandler implements Runnable {
         if (Manager.checkingDuplication(username, fileName)) {
             new MainThread(new UDPSender(udpServerSocketII, receivePacket.getAddress(), receivePacket.getPort(), "1".getBytes())).start();
             new MainThread(new ClientHandler(udpServerSocketII, receivePacket, username)).start();
+            udpServerSocketII.close();
             Storage.getUsers().get(username).getFiles().add(fileName);
         } else {
             new MainThread(new UDPSender(udpServerSocketII, receivePacket.getAddress(), receivePacket.getPort(), "0".getBytes())).start();
             run();
         }
-        check = false;
-    }
-
-    public boolean isCheck() {
-        return check;
     }
 }

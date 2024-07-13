@@ -14,7 +14,7 @@ public class Server {
             AtomicBoolean check = new AtomicBoolean(true);
             try {
                 ServerSocket tcpServerSocket = new ServerSocket(Storage.getPortI());
-                DatagramSocket udpServerSocketI = new DatagramSocket(Storage.getPortI());
+                DatagramSocket udpServerSocketV = new DatagramSocket(Storage.getPortV());
                 DatagramSocket udpServerSocketII = new DatagramSocket(Storage.getPortIi());
                 DatagramSocket udpServerSocketIII = new DatagramSocket(Storage.getPortIii());
                 DatagramSocket udpServerSocketIV= new DatagramSocket(Storage.getPortIv());
@@ -32,25 +32,26 @@ public class Server {
                     }
                 }).start();
 
-
-                while (true) {
-                    try {
-                        byte[] receiveDataI = new byte[Storage.getPacketSize()];
-                        DatagramPacket receivePacketI = new DatagramPacket(receiveDataI, receiveDataI.length);
-                        udpServerSocketI.receive(receivePacketI);
-                        ListHandler listHandler = new ListHandler(udpServerSocketI, receivePacketI, check.get());
-                        new MainThread(listHandler).start();
-                        Thread.sleep(10000);
-                        check.set(listHandler.isCheck());
-                        System.out.println(check.get());
-                        if (!check.get()) {
-                            System.out.println("oomad");
-                            break;
+                new MainThread(() -> {
+                    while (true) {
+                        try {
+                            byte[] receiveDataV = new byte[Storage.getPacketSize()];
+                            DatagramPacket receivePacketV = new DatagramPacket(receiveDataV, receiveDataV.length);
+                            udpServerSocketV.receive(receivePacketV);
+                            ListHandler listHandler = new ListHandler(udpServerSocketV, receivePacketV, check.get());
+                            new MainThread(listHandler).start();
+//                            Thread.sleep(2000);
+//                            check.set(listHandler.isCheck());
+//                            System.out.println(check.get());
+//                            if (!check.get()) {
+//                                System.out.println("oomad");
+//                                break;
+//                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
                         }
-                    } catch (IOException | InterruptedException e) {
-                        e.printStackTrace();
                     }
-                }
+                }).start();
 
                 while (true) {
                     System.out.println("residam");
@@ -58,18 +59,19 @@ public class Server {
                     DatagramPacket uploadOrDownloadPacket = new DatagramPacket(uploadOrDownloadByteArray, uploadOrDownloadByteArray.length);
                     udpServerSocketIV.receive(uploadOrDownloadPacket);
                     String input = new String(uploadOrDownloadPacket.getData(), 0, uploadOrDownloadPacket.getLength());
+                    udpServerSocketIV.close();
                     if (input.equals("1")) {
                         byte[] receiveDataII = new byte[Storage.getPacketSize()];
                         DatagramPacket receivePacketII = new DatagramPacket(receiveDataII, receiveDataII.length);
                         udpServerSocketII.receive(receivePacketII);
-                        UploadHandler uploadHandler = new UploadHandler(udpServerSocketII, receivePacketII, check.get());
+                        UploadHandler uploadHandler = new UploadHandler(udpServerSocketII, receivePacketII);
                         new MainThread(uploadHandler).start();
                         break;
                     } else {
                         byte[] receiveDataIII = new byte[Storage.getPacketSize()];
                         DatagramPacket receivePacketIII = new DatagramPacket(receiveDataIII, receiveDataIII.length);
                         udpServerSocketIII.receive(receivePacketIII);
-                        DownloadHandler downloadHandler = new DownloadHandler(udpServerSocketIII, receivePacketIII, check.get());
+                        DownloadHandler downloadHandler = new DownloadHandler(udpServerSocketIII, receivePacketIII);
                         new MainThread(downloadHandler).start();
                         break;
                     }

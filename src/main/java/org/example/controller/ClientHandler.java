@@ -37,6 +37,8 @@ public class ClientHandler implements Runnable {
                 int len = receivePacket.getLength();
 
                 if (len == 0) {
+//                    String ackMessage = "File " + fileName + " received successfully";
+//                    new MainThread(new UDPSender(serverSocketII, initialPacket.getAddress(), initialPacket.getPort(), ackMessage.getBytes())).start();
                     break;
                 }
 
@@ -44,10 +46,6 @@ public class ClientHandler implements Runnable {
             }
 
             System.out.println("File received successfully : " + fileName);
-
-//            String ackMessage = "File " + fileName + " received successfully";
-//            new MainThread(new UDPSender(serverSocketII, clientAddress, clientPort, ackMessage.getBytes())).start();
-
 
         } catch (IOException e) {
             e.printStackTrace();

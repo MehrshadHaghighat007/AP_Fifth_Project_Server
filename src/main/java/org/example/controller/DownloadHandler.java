@@ -9,12 +9,10 @@ import java.net.DatagramSocket;
 public class DownloadHandler implements Runnable {
     private DatagramSocket udpServerSocketIII;
     private DatagramPacket receivePacketIII;
-    private boolean check;
 
-    public DownloadHandler(DatagramSocket udpServerSocketIII, DatagramPacket receivePacketIII, boolean check) {
+    public DownloadHandler(DatagramSocket udpServerSocketIII, DatagramPacket receivePacketIII) {
         this.udpServerSocketIII = udpServerSocketIII;
         this.receivePacketIII = receivePacketIII;
-        this.check = check;
     }
 
     @Override
@@ -31,14 +29,10 @@ public class DownloadHandler implements Runnable {
         if (Manager.checkingExistence(username, fileName)) {
             new MainThread(new UDPSender(udpServerSocketIII, fileNamePacket.getAddress(), fileNamePacket.getPort(), "1".getBytes())).start();
             new MainThread(new FileSender(udpServerSocketIII, fileNamePacket.getAddress(), fileNamePacket.getPort(), fileName, username)).start();
+            udpServerSocketIII.close();
         } else {
             new MainThread(new UDPSender(udpServerSocketIII, fileNamePacket.getAddress(), fileNamePacket.getPort(), "0".getBytes())).start();
             run();
         }
-        check = false;
-    }
-
-    public boolean isCheck() {
-        return check;
     }
 }
