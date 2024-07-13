@@ -7,38 +7,39 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 
 public class UploadHandler implements Runnable {
+    private DatagramSocket udpServerSocketII;
+    private final DatagramPacket receivePacketII;
+    private boolean check;
 
-    private final DatagramSocket udpServerSocket;
-    private final DatagramPacket receivePacket;
-
-    public UploadHandler(DatagramSocket udpServerSocket, DatagramPacket receivePacket) {
-        this.udpServerSocket = udpServerSocket;
-        this.receivePacket = receivePacket;
+    public UploadHandler(DatagramSocket udpServerSocketII, DatagramPacket receivePacketII, boolean check) {
+        this.udpServerSocketII = udpServerSocketII;
+        this.receivePacketII = receivePacketII;
+        this.check = check;
     }
 
     @Override
     public void run() {
-        String input = new String(receivePacket.getData(), 0, receivePacket.getLength());
-        if (input.equals("1")) {
-            try {
-                String output = "0";
-                byte[] feedback = output.getBytes();
-                new MainThread(new UDPSender(udpServerSocket, receivePacket.getAddress(), receivePacket.getPort(), feedback)).start();
-                upload();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-
+        String username = new String(receivePacketII.getData(), 0, receivePacketII.getLength());
+        byte[] receiveData = new byte[Storage.getPacketSize()];
+        DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
+        try {
+            udpServerSocketII.receive(receivePacket);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        String fileName = new String(receivePacket.getData(), 0, receivePacket.getLength());
+        if (Manager.checkingDuplication(username, fileName)) {
+            new MainThread(new UDPSender(udpServerSocketII, receivePacket.getAddress(), receivePacket.getPort(), "1".getBytes())).start();
+            new MainThread(new ClientHandler(udpServerSocketII, receivePacket, username)).start();
+            Storage.getUsers().get(username).getFiles().add(fileName);
+        } else {
+            new MainThread(new UDPSender(udpServerSocketII, receivePacket.getAddress(), receivePacket.getPort(), "0".getBytes())).start();
+            run();
+        }
+        check = false;
     }
 
-    private void upload() throws IOException {
-        while(true) {
-            byte[] receiveData = new byte[Storage.getPacketSize()];
-            DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-            udpServerSocket.receive(receivePacket);
-            new MainThread(new ClientHandler(udpServerSocket, receivePacket)).start();
-        }
+    public boolean isCheck() {
+        return check;
     }
 }
